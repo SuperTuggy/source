@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CivGrid Visualizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; }
+        .legend { padding: 10px; background: white; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        async function init() {
+            const map = L.map('map').setView([40.7128, -74.0060], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            // Load processed data
+            const response = await fetch('output.geojson');
+            const data = await response.json();
+
+            // Add amenities
+            data.amenities.forEach(amenity => {
+                L.circleMarker([amenity.lat, amenity.lon], {
+                    color: '#3388ff',
+                    radius: 5
+                }).bindPopup(`<b>${amenity.type}</b>`).addTo(map);
+            });
+
+            // Add roads
+            data.roads.forEach(road => {
+                L.polyline(road.geometry, {
+                    color: road.has_bike_lane ? '#4CAF50' : '#FF5252',
+                    weight: road.lanes
+                }).bindPopup(`
+                    <b>${road.type} Road</b><br>
+                    Lanes: ${road.lanes}<br>
+                    Bike Lane: ${road.has_bike_lane ? 'Yes' : 'No'}
+                `).addTo(map);
+            });
+
+            // Legend
+            const legend = L.control({position: 'bottomright'});
+            legend.onAdd = () => {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4>Legend</h4>
+                    <div><span style="color: #3388ff">●</span> Amenities</div>
+                    <div><span style="color: #4CAF50">—</span> Bike Lanes</div>
+                    <div><span style="color: #FF5252">—</span> No Bike Lanes</div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+        init();
+    </script>
+</body>
+</html>

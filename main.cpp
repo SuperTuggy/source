@@ -5,6 +5,7 @@
 #include "osmium/visitor.hpp"
 
 
+
 int main (int argc, char* argv[]) {
     
    if (argc < 2) {
@@ -22,7 +23,7 @@ int main (int argc, char* argv[]) {
     std::cout << "The number of relations in the file are: " << handler.get_relation_count() << std::endl;
     my_file.close();
 
-
+    
 
   } catch (const std::exception& e) {
     std::cerr << "Error" << e.what() << std::endl;
